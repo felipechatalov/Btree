@@ -7,6 +7,9 @@
 *.obj
 *.elf
 
+# Others
+log.dat
+
 # Linker output
 *.ilk
 *.map
