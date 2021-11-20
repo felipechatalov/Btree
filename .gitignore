@@ -9,6 +9,7 @@
 
 # Others
 log.dat
+btree.exe
 
 # Linker output
 *.ilk
