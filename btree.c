@@ -19,6 +19,13 @@ typedef struct {
 // 5 * 4 = 20
 // 40 bytes
 
+typedef struct
+{
+  int rrn_raiz;
+  int qtd_paginas;
+} CABECA;
+
+
 
 PAGINA lerPagina(int rrn, FILE * file){
     PAGINA temp;
@@ -79,6 +86,20 @@ int printPagina(PAGINA* pag){
     }
     printf(" %d ", pag->FILHOS[j]);
 
+}
+
+int printChaves(PAGINA* pag){
+    int i, j;
+    int aux=0;
+
+     for(i = 0; i < pag->CONTACHAVES-1; i++){
+        printf(" %d |", pag->CHAVES[i]);
+    }
+      printf("%d ", pag->CHAVES[i]);
+      //printf("I --> %i", i);
+     // printf(" %d ", pag->CHAVES[i]);
+      //vet[i] = pag->CHAVES[i];
+     
 }
 
 int logPagina(FILE* file, PAGINA* pag){
@@ -368,13 +389,25 @@ int imprimebtree(){
             i++;
         }
     }
-    
-    
-    
-
-    
-
 }
+
+    
+int emOrdem(FILE *file, int rrn)
+{
+  PAGINA pag;
+  if (rrn == -1)
+    return 0;
+  else
+    pag = lerPagina(rrn, file);
+  
+  for (int i = 0; i <= pag.CONTACHAVES; i++)
+  {
+    emOrdem(file, pag.FILHOS[i]);
+    if (pag.CHAVES[i] != -1)
+      printf(" %d |", pag.CHAVES[i]);
+  }
+}
+ 
 
 int logEverything(FILE* file, FILE* log){
     PAGINA pag;
@@ -554,9 +587,15 @@ int main (int argc, char *argv[]){
     }
 
     else if (argc == 2 && strcmp(argv[1], "-k") == 0) {
+         printf("Impressao das chaves '-k'\n");
+         FILE *file;
+         CABECALHO cabeca;
 
-        printf("Impressao das chaves '-k'\n");
-        // imprimeposicao();
+         if (file = fopen("btree.dat", "r+b"))
+         {
+          fread(&cabeca, sizeof(int), 1, file);
+          emOrdem(file, cabeca.RAIZ);
+        }
     }
     
     else {
