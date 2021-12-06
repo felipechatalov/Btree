@@ -228,7 +228,7 @@ int insere(int rrn, int chave, FILE* file, int* filho_d_pro, int* chave_pro){
 
 
 int lerProximoInput(FILE* file){
-    char buffer[8]; // aguenta de 0 ate 9999
+    char buffer[8]; 
     memset(buffer, 0, sizeof(buffer));
 
 
@@ -236,14 +236,12 @@ int lerProximoInput(FILE* file){
     int c = fgetc(file);
     while(c != EOF && c != '|'){
         
-        // printf("\n char -> %c", c, c);
+     
         buffer[i] = c;
-        // printf("\n string -> %s", buffer);
         c = fgetc(file);
 
         i++;
     }
-    // printf("\nint -> %d", atoi(buffer));
     if (c == EOF){
         return -1;
     }
