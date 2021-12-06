@@ -10,9 +10,9 @@ typedef struct {
 // 4 bytes
 
 typedef struct {
-    int CONTACHAVES;    // numero de chaves alocadas na pagina -- maximo de "MAXCHAVES"
+    int CONTACHAVES;             // numero de chaves alocadas na pagina -- maximo de "MAXCHAVES"
     int CHAVES[MAXCHAVES-1];     // valor das chaves armazenadas na pagina
-    int FILHOS[MAXCHAVES];    // vetor com os filhos/rrn dos filhos apontando para a proxima pagina
+    int FILHOS[MAXCHAVES];       // vetor com os filhos/rrn dos filhos apontando para a proxima pagina
 } PAGINA;
 // 4
 // 4 * 4 = 16
@@ -64,7 +64,6 @@ int escrevePagina(int rrn, PAGINA* pag, FILE* file){
 
 int printPagina(PAGINA* pag){
     int i, j;
-    // printf("\nContaChaves -> %d", pag -> CONTACHAVES);
     printf("\nChaves:");
     for(i = 0; i < pag->CONTACHAVES-1; i++){
         printf(" %d |", pag->CHAVES[i]);
@@ -81,24 +80,6 @@ int printPagina(PAGINA* pag){
 
 }
 
-int logPagina(FILE* file, PAGINA* pag){
-    int i, j;
-    fprintf(file, "\nContaChaves -> %d", pag -> CONTACHAVES);
-    fprintf(file, "\nChaves:");
-    for(i = 0; i < pag->CONTACHAVES-1; i++){
-        fprintf(file, " %d |", pag->CHAVES[i]);
-    }
-    fprintf(file, " %d ", pag->CHAVES[i]);
-
-
-
-    fprintf(file, "\nFilhos:");
-    for(j = 0; j < pag->CONTACHAVES; j++){
-        fprintf(file, " %d |", pag->FILHOS[j]);
-    }
-    fprintf(file, " %d ", pag->FILHOS[j]);
-
-}
 // 0 -> NAO_ENCONTRADO
 // 1 -> ENCONTRADO
 int busca(int rrn, int chave, FILE* file, int* rrn_encontrado, int* pos_encontrado){
@@ -136,64 +117,6 @@ PAGINA insereNaPagina(int chave, int filho_d, PAGINA* pag){
 }
 
 
-PAGINA divideAntigo(int chave, int filho_d, PAGINA* pag, FILE* file, int * chave_pro, int* filho_d_pro, PAGINA* pag2){
-    PAGINA pag_aux;
-    pag_aux = *pag;
-
-    int i = MAXCHAVES-1;
-    
-
-    // ciar 2 vetores adicionais auxiliares com 5 posicoes para chaves
-    // e 6 posicoes para os filhos, trabalhar com eles ao inves
-    // do objeto pag_aux, e por final separar corretamente qual ira
-    // para o *pag e qual ira para o *pag2
-
-
-    while(i > 0 && chave < pag_aux.CHAVES[i-1]){
-        pag_aux.CHAVES[i] = pag_aux.CHAVES[i-1];
-        pag_aux.FILHOS[i+1] = pag_aux.FILHOS[i];
-        i--;
-    }
-    pag_aux.CHAVES[i] = chave;
-    pag_aux.FILHOS[i+1] = filho_d;
-
-    int mid = (MAXCHAVES-1)/2;
-
-    *filho_d_pro = getRrnNewPage(file);
-    *chave_pro = pag_aux.CHAVES[mid];
-
-
-    *pag = inicializaPagina(*pag);
-
-    i = 0;
-    while(i < mid){
-        pag->CHAVES[i] = pag_aux.CHAVES[i];
-        pag->FILHOS[i] = pag_aux.FILHOS[i];
-        pag->CONTACHAVES++;
-        i++;
-    }
-    // chaves 0 e 1 para esq
-    // filhos 0 1 e 2 para esq
-    
-    // filho 2 nao pode ir para esq e dir ao mesmo tempo
-    
-    // pag->FILHOS[i] = pag_aux.FILHOS[i];
-
-    *pag2 = inicializaPagina(*pag2);
-
-    i = mid;
-    while (i < MAXCHAVES-1){
-        pag2->CHAVES[pag2->CONTACHAVES] = pag_aux.CHAVES[i];
-        pag2->FILHOS[pag2->CONTACHAVES] = pag_aux.FILHOS[i];
-        pag2->CONTACHAVES++;
-        i++;
-    }
-    // chaves 2 e 3 para esq
-    // filhos 2 3 e 4 para filhos
-    pag2->FILHOS[pag2->CONTACHAVES] = pag_aux.FILHOS[i];
-
-}
-
 PAGINA divide(int chave, int filho_d, PAGINA* pag, FILE* file, int * chave_pro, int* filho_d_pro, PAGINA* pag2){
     PAGINA pag_aux;
     pag_aux = *pag;
@@ -208,7 +131,6 @@ PAGINA divide(int chave, int filho_d, PAGINA* pag, FILE* file, int * chave_pro, 
         auxFILHOS[k] = pag->FILHOS[k];
     }
     auxCHAVES[MAXCHAVES-1] = -1;
-    // auxFILHOS[MAXCHAVES] = -1;
     auxFILHOS[MAXCHAVES] = -1;
     
 
@@ -376,25 +298,23 @@ int imprimebtree(){
 
 }
 
-int logEverything(FILE* file, FILE* log){
-    PAGINA pag;
-    int limit, i;
-
-    fseek(file, 0, SEEK_END);
-    limit = (ftell(file)-sizeof(CABECALHO))/sizeof(PAGINA);
-    rewind(file);
-    
-
-    i = 0;
-    while(i < limit){
-        pag = lerPagina(i, file);
-        fprintf(log, "\nPagina %d", i);
-        logPagina(log, &pag);
-        i++;
+int emOrdem(FILE *file, int rrn)
+{
+  PAGINA pag;
+  if (rrn == -1)
+    return 0;
+  else
+    pag = lerPagina(rrn, file);
+  
+    for (int i = 0 ; i < pag.CONTACHAVES; i++){
+        emOrdem(file, pag.FILHOS[i]);
+        if (pag.CHAVES[i] != -1){
+            printf(" %d |", pag.CHAVES[i]);
+        }
     }
-    fprintf(log, "\n\n\n\n");
-
+    emOrdem(file, pag.FILHOS[pag.CONTACHAVES]);
 }
+
 
 int gerenciador(char* nome){
     FILE* arqLer, *arqEsc, *log;
@@ -461,84 +381,6 @@ int gerenciador(char* nome){
 
 }
 
-int criacao(char * nome){
-    FILE* arqLer, *arqEsc;
-    PAGINA pag0, pag1;
-    CABECALHO cab;
-    // if ((arqLer = fopen(nome, "rb")) == NULL) {
-    //     printf("Erro na leitura do arquivo \n");
-    //     exit(EXIT_FAILURE);
-    // }
-    if ((arqEsc = fopen("btree.dat", "w+b")) == NULL){
-        printf("Erro na criacao do arquivo \n");
-        exit(EXIT_FAILURE);
-    }
-
-    cab.RAIZ = 0;
-    
-
-
-    pag0.CONTACHAVES = 4;
-    
-    pag0.CHAVES[0] = 5; 
-    pag0.CHAVES[1] = 6; 
-    pag0.CHAVES[2] = 7; 
-    pag0.CHAVES[3] = 8; 
-
-    pag0.FILHOS[0] = 1;
-    pag0.FILHOS[1] = -1;
-    pag0.FILHOS[2] = -1;
-    pag0.FILHOS[3] = -1;
-    pag0.FILHOS[4] = -1;
-
-    pag1.CONTACHAVES = 4;
-    
-    pag1.CHAVES[0] = 1; 
-    pag1.CHAVES[1] = 2; 
-    pag1.CHAVES[2] = 3; 
-    pag1.CHAVES[3] = 4; 
-
-    pag1.FILHOS[0] = -1;
-    pag1.FILHOS[1] = -1;
-    pag1.FILHOS[2] = -1;
-    pag1.FILHOS[3] = -1;
-    pag1.FILHOS[4] = -1;
-
-
-    cab.RAIZ = 0;
-
-    fwrite(&cab, sizeof(CABECALHO), 1, arqEsc);
-
-    fwrite(&pag0, sizeof(PAGINA), 1, arqEsc);
-    fwrite(&pag1, sizeof(PAGINA), 1, arqEsc);
-
-    PAGINA buffer;
-    buffer = lerPagina(0, arqEsc);
-    // rewind(arqEsc);
-    // fread(&buffer, sizeof(PAGINA), 1, arqEsc);
-
-
-    printf("\nchaves -> %d", buffer.CONTACHAVES);
-    printf("\nvalor -> %d", buffer.CHAVES[3]);
-    printf("\nfilhos -> %d", buffer.FILHOS[3]);
-
-    int rrn, pos;
-
-    if (busca(cab.RAIZ, 7, arqEsc, &rrn, &pos) == 1){
-        printf("\n rrn -> %d, pos -> %d", rrn, pos);
-    }
-    else{
-        printf("\nNao encontrou");
-    }
-
-    fclose(arqEsc);
-
-}   
-
-
-
-
-
 
 int main (int argc, char *argv[]){
 
@@ -556,7 +398,11 @@ int main (int argc, char *argv[]){
     else if (argc == 2 && strcmp(argv[1], "-k") == 0) {
 
         printf("Impressao das chaves '-k'\n");
-        // imprimeposicao();
+        FILE* file = fopen("btree.dat", "rb");
+        CABECALHO cab;
+
+        fread(&cab, sizeof(CABECALHO), 1, file);
+        emOrdem(file, cab.RAIZ);
     }
     
     else {
