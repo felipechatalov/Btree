@@ -359,23 +359,13 @@ int gerenciador(char* nome){
        
         fprintf(log, "\ninserindo %d\n", c);
         logEverything(arqEsc, log);
-        // PAGINA p = lerPagina(0, arqEsc);
-        // printPagina(&p);
-        // if (c == 12){
-        //     p = lerPagina(1, arqEsc);
-        //     printPagina(&p);
-        //     p = lerPagina(2, arqEsc);
-        //     printPagina(&p);
-        // }
+        
         c = lerProximoInput(arqLer);
     }
     rewind(arqEsc);
     fwrite(&cab, sizeof(CABECALHO), 1, arqEsc);
     printf("\ntodas as paginas");
-    // for (int j = 0; j < 9; j++){
-    //     PAGINA p = lerPagina(j, arqEsc);
-    //     printPagina(&p);
-    // }
+
 
     fclose(arqEsc);
 
